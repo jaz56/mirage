@@ -1,9 +1,8 @@
 # Propriétaires du code : GitHub demande automatiquement leur relecture sur chaque pull request.
-# Remplacer MALEK_GITHUB et NOUR_GITHUB par les vrais pseudos GitHub (sans les crochets).
 
 # Fichiers partagés : les trois relisent
-/src/contrats/        @jaz56 @MALEK_GITHUB @NOUR_GITHUB
-/src/config/          @jaz56 @MALEK_GITHUB @NOUR_GITHUB
+/src/contrats/        @jaz56 @Malekkk25 @nourbentaher
+/src/config/          @jaz56 @Malekkk25 @nourbentaher
 /package.json         @jaz56
 /package-lock.json    @jaz56
 /eslint.config.mjs    @jaz56
@@ -14,7 +13,7 @@
 /src/main.ts          @jaz56
 /tests/temps/         @jaz56
 /tests/integration/   @jaz56
-/src/lac/             @MALEK_GITHUB
-/tests/lac/           @MALEK_GITHUB
-/src/perception/      @NOUR_GITHUB
-/tests/perception/    @NOUR_GITHUB
+/src/lac/             @Malekkk25
+/tests/lac/           @Malekkk25
+/src/perception/      @nourbentaher
+/tests/perception/    @nourbentaher
