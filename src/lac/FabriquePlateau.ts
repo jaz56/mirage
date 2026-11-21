@@ -74,16 +74,25 @@ export class FabriquePlateauAleatoire extends FabriquePlateau {
     return "croute";
   }
 
-  /** Marche aléatoire du haut vers le bas, qui pose de la croûte sur son passage. */
+  /**
+   * Marche aléatoire de la case de départ de J1 (milieu de la première ligne) à celle de J2
+   * (milieu de la dernière ligne), qui pose de la croûte sur son passage. Les deux départs
+   * sont donc toujours sur un chemin praticable qui les relie.
+   */
   private tracerCheminGaranti(grille: NomTerrain[][]): void {
-    let x = Math.min(this.largeur - 1, Math.floor(this.alea() * this.largeur));
+    const milieu = Math.floor(this.largeur / 2);
+    let x = milieu;
     for (let y = 0; y < this.hauteur; y++) {
       grille[y][x] = "croute";
       if (y < this.hauteur - 1) {
-        const decalage = Math.floor(this.alea() * 3) - 1; // -1, 0 ou +1
-        const nx = Math.max(0, Math.min(this.largeur - 1, x + decalage));
-        grille[y][nx] = "croute"; // garde la continuité si on se décale sur la même ligne
-        x = nx;
+        // Un décalage d'une colonne par ligne au maximum : il faut garder assez de lignes
+        // en dessous pour pouvoir revenir au milieu.
+        const candidats = [x - 1, x, x + 1].filter(
+          (c) => c >= 0 && c < this.largeur && Math.abs(c - milieu) <= this.hauteur - 2 - y,
+        );
+        const choix = Math.min(candidats.length - 1, Math.floor(this.alea() * candidats.length));
+        x = candidats[choix];
+        grille[y][x] = "croute"; // garde la continuité quand on se décale sur la même ligne
       }
     }
   }

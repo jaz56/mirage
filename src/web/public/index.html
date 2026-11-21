@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mirage – la traversée du Chott</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body data-phase="Aube">
+    <div class="ciel" aria-hidden="true"><div class="astre" id="astre"></div></div>
+
+    <main class="jeu">
+      <section class="scene">
+        <header class="bandeau">
+          <h1>MIRAGE</h1>
+          <p id="phase-texte">Aube</p>
+        </header>
+        <div class="toile">
+          <canvas id="lac" aria-label="Le lac de sel"></canvas>
+          <div id="inspecteur" class="inspecteur">Survole une case</div>
+        </div>
+      </section>
+
+      <aside class="panneau">
+        <div class="carte joueur" id="carte-joueur">
+          <div class="joueur-tete">
+            <span class="pastille" id="pastille"></span>
+            <strong id="nom-joueur">J1</strong>
+            <span class="tour" id="tour">Tour 1</span>
+          </div>
+          <div class="ligne">
+            <span class="etiquette">Actions</span>
+            <span class="pips" id="pa"></span>
+          </div>
+          <div class="ligne">
+            <span class="etiquette">Outres</span>
+            <span class="pips" id="outres"></span>
+          </div>
+          <div class="ligne">
+            <span class="etiquette">Cartes</span>
+            <span class="pips" id="cartes"></span>
+          </div>
+          <div class="ligne">
+            <span class="etiquette">Chameau</span>
+            <span class="badge" id="chameau">Reposé</span>
+          </div>
+        </div>
+
+        <div class="carte">
+          <div class="frise" id="frise"></div>
+          <p class="note" id="description-phase"></p>
+        </div>
+
+        <div class="carte commandes">
+          <div class="croix" aria-label="Avancer">
+            <button data-cmd="n" title="Nord (↑ / Z / W)" class="haut">▲</button>
+            <button data-cmd="o" title="Ouest (← / Q / A)" class="gauche">◀</button>
+            <button data-cmd="e" title="Est (→ / D)" class="droite">▶</button>
+            <button data-cmd="s" title="Sud (↓ / S)" class="bas">▼</button>
+          </div>
+          <div class="actions">
+            <button data-cmd="sonder ici" title="Sonder ma case (X) – Maj+flèche pour une voisine">
+              🔍 Sonder <small>1 PA · X</small>
+            </button>
+            <button data-cmd="balise" title="Poser une balise (B)">🚩 Balise <small>1 PA · B</small></button>
+            <button data-cmd="boire" title="Boire une outre (R)">💧 Boire <small>1 PA · R</small></button>
+            <button data-cmd="fin" class="fin" title="Terminer le tour (Entrée)">
+              ⏭ Fin du tour <small>Entrée</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="carte">
+          <h2>Cartes Mirage <small>2 PA – piège l'adversaire</small></h2>
+          <div class="cartes" id="cartes-mirage">
+            <button data-carte="FausseOasis">🌴 Fausse oasis</button>
+            <button data-carte="DuneFantome">🏜 Dune fantôme</button>
+            <button data-carte="SelTrompeur">🧂 Sel trompeur</button>
+          </div>
+          <p class="note" id="aide-ciblage">Choisis une carte puis clique une case du lac.</p>
+        </div>
+
+        <div class="carte journal-carte">
+          <h2>Journal</h2>
+          <ul id="journal" class="journal"></ul>
+        </div>
+
+        <div class="legende">
+          <span><i class="pt croute"></i>Croûte</span>
+          <span><i class="pt dune"></i>Dune</span>
+          <span><i class="pt oasis"></i>Oasis</span>
+          <span><i class="pt puits"></i>Puits sec</span>
+          <span><i class="pt boue"></i>Boue</span>
+          <span><i class="pt fragile"></i>Croûte fragile</span>
+          <span><i class="pt brume"></i>Inconnu</span>
+        </div>
+        <button id="nouvelle" class="discret">↻ Nouvelle partie</button>
+      </aside>
+    </main>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <div id="ecran" class="ecran visible">
+      <div class="ecran-boite">
+        <h2 id="ecran-titre">MIRAGE</h2>
+        <p id="ecran-texte">
+          Traverse le lac de sel avant ton adversaire.<br />
+          J1 part du haut, J2 part du bas. Les apparences sont trompeuses…
+        </p>
+        <button id="ecran-bouton" class="grand">Commencer</button>
+      </div>
+    </div>
+
+    <script src="/jeu.js"></script>
+  </body>
+</html>
