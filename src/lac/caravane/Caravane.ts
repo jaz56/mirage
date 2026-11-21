@@ -11,15 +11,15 @@ import { creerEtatChameau, type EtatChameau } from "./EtatChameau";
 
 /** La caravane d'un joueur : position, outres, cartes et état du chameau (State). */
 
-export class Caravane implements CaravaneJeu{
-    private position:Position;
-    private etat :EtatChameau = creerEtatChameau("Repose");
-    private nbOutres :number;
-    private nbCartes :number;
-    private toursSansBoire =0;
-    private enlisee =false;
+export class Caravane implements CaravaneJeu {
+  private position: Position;
+  private etat: EtatChameau = creerEtatChameau("Repose");
+  private nbOutres: number;
+  private nbCartes: number;
+  private toursSansBoire = 0;
+  private enlisee = false;
 
-    constructor(
+  constructor(
     readonly joueur: IdJoueur,
     positionDepart: Position,
     outres: number,
@@ -58,7 +58,7 @@ export class Caravane implements CaravaneJeu{
     this.changerEtat("Panique");
   }
 
- boire(): boolean {
+  boire(): boolean {
     if (this.nbOutres <= 0) {
       return false;
     }
@@ -97,5 +97,3 @@ export class Caravane implements CaravaneJeu{
     }
   }
 }
-
-    

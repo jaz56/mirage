@@ -2,11 +2,7 @@ import { describe, expect, it } from "vitest";
 import { PlateauFixe } from "../stubs/PlateauFixe";
 
 describe("Plateau", () => {
-  const plateau = PlateauFixe.depuis([
-    "..^",
-    "XO.",
-    "^..",
-  ]);
+  const plateau = PlateauFixe.depuis(["..^", "XO.", "^.."]);
 
   it("connaît ses dimensions", () => {
     expect(plateau.largeur).toBe(3);

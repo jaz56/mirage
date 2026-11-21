@@ -62,10 +62,7 @@ export class PlateauDeTest implements Plateau {
     this.largeur = grille[0].length;
   }
 
-  static depuis(
-    lignes: readonly string[],
-    etats: Record<string, NomEtatSel> = {},
-  ): PlateauDeTest {
+  static depuis(lignes: readonly string[], etats: Record<string, NomEtatSel> = {}): PlateauDeTest {
     const grille = lignes.map((ligne, y) =>
       [...ligne].map((caractere, x) => {
         const terrain = TERRAINS[caractere];

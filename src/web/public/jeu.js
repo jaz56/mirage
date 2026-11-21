@@ -9,9 +9,27 @@ const MARGE = 28;
 const HAUT_RELIEF = 34; // place au-dessus de la première ligne pour les reliefs et les chameaux
 
 const COULEUR_JOUEUR = { J1: "#e8742a", J2: "#1f9db0" };
-const NOMS_TERRAIN = { croute: "Croûte", dune: "Dune", oasis: "Oasis", "puits-sec": "Puits sec", "?": "Inconnu" };
-const NOMS_SEL = { Solide: "solide", Craquelee: "craquelé", Boue: "boue", CrouteFragile: "croûte fragile", "?": "?" };
-const NOMS_PHASE = { Aube: "Aube", Matin: "Matin", Zenith: "Zénith", Crepuscule: "Crépuscule", Nuit: "Nuit" };
+const NOMS_TERRAIN = {
+  croute: "Croûte",
+  dune: "Dune",
+  oasis: "Oasis",
+  "puits-sec": "Puits sec",
+  "?": "Inconnu",
+};
+const NOMS_SEL = {
+  Solide: "solide",
+  Craquelee: "craquelé",
+  Boue: "boue",
+  CrouteFragile: "croûte fragile",
+  "?": "?",
+};
+const NOMS_PHASE = {
+  Aube: "Aube",
+  Matin: "Matin",
+  Zenith: "Zénith",
+  Crepuscule: "Crépuscule",
+  Nuit: "Nuit",
+};
 const ICONES_PHASE = { Aube: "🌅", Matin: "🌤", Zenith: "☀️", Crepuscule: "🌇", Nuit: "🌙" };
 const ORDRE_PHASES = ["Aube", "Matin", "Zenith", "Crepuscule", "Nuit"];
 const NOMS_CHAMEAU = { Repose: "Reposé", Assoiffe: "Assoiffé", Panique: "Paniqué" };
@@ -149,15 +167,18 @@ function mettreAJourPanneau() {
   el("description-phase").textContent = etat.descriptionPhase;
 
   const PA_MAX = 3;
-  el("pa").innerHTML = Array.from({ length: Math.max(PA_MAX, etat.pa) }, (_, i) =>
-    `<span class="pip pa${i < etat.pa ? "" : " vide"}"></span>`,
+  el("pa").innerHTML = Array.from(
+    { length: Math.max(PA_MAX, etat.pa) },
+    (_, i) => `<span class="pip pa${i < etat.pa ? "" : " vide"}"></span>`,
   ).join("");
-  el("outres").innerHTML = moi.outres > 0
-    ? Array.from({ length: moi.outres }, () => '<span class="pip goutte">💧</span>').join("")
-    : '<span class="vide-txt">aucune</span>';
-  el("cartes").innerHTML = moi.cartes > 0
-    ? Array.from({ length: moi.cartes }, () => '<span class="pip carte-p">★</span>').join("")
-    : '<span class="vide-txt">aucune</span>';
+  el("outres").innerHTML =
+    moi.outres > 0
+      ? Array.from({ length: moi.outres }, () => '<span class="pip goutte">💧</span>').join("")
+      : '<span class="vide-txt">aucune</span>';
+  el("cartes").innerHTML =
+    moi.cartes > 0
+      ? Array.from({ length: moi.cartes }, () => '<span class="pip carte-p">★</span>').join("")
+      : '<span class="vide-txt">aucune</span>';
 
   const badge = el("chameau");
   badge.textContent = NOMS_CHAMEAU[moi.chameau] + (moi.enlisee ? " · enlisé" : "");
@@ -171,7 +192,11 @@ function mettreAJourPanneau() {
   const journal = el("journal");
   journal.innerHTML = etat.journal
     .map((ligne) => {
-      const classe = ligne.startsWith("Phase") ? "phase" : /Victoire|égalité/.test(ligne) ? "fin-partie" : "";
+      const classe = ligne.startsWith("Phase")
+        ? "phase"
+        : /Victoire|égalité/.test(ligne)
+          ? "fin-partie"
+          : "";
       return `<li class="${classe}">${echapper(ligne)}</li>`;
     })
     .join("");
@@ -190,7 +215,10 @@ function mettreAJourPanneau() {
 }
 
 function echapper(texte) {
-  return texte.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  return texte.replace(
+    /[&<>"]/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+  );
 }
 
 function montrerEcran(titre, texte, bouton, action) {
@@ -221,10 +249,15 @@ async function nouvellePartie() {
   carteChoisie = null;
   attenteEcran = true;
   appliquer(reponse.etat);
-  montrerEcran("MIRAGE", "Nouvelle partie : un nouveau lac t'attend. Joueur 1 commence.", "Commencer", () => {
-    attenteEcran = false;
-    cacherEcran();
-  });
+  montrerEcran(
+    "MIRAGE",
+    "Nouvelle partie : un nouveau lac t'attend. Joueur 1 commence.",
+    "Commencer",
+    () => {
+      attenteEcran = false;
+      cacherEcran();
+    },
+  );
 }
 
 // ---------------------------------------------------------------------------------------
@@ -253,10 +286,14 @@ function pseudoAlea(x, y, n = 0) {
 
 function reliefDe(caseVue) {
   switch (caseVue.terrain) {
-    case "dune": return 11;
-    case "oasis": return 0;
-    case "puits-sec": return -5;
-    default: return 0;
+    case "dune":
+      return 11;
+    case "oasis":
+      return 0;
+    case "puits-sec":
+      return -5;
+    default:
+      return 0;
   }
 }
 
@@ -321,7 +358,12 @@ function decorTerrain(caseVue, px, py, x, y, t) {
       // grains de sel
       ctx.fillStyle = "rgba(255,255,255,0.8)";
       for (let i = 0; i < 6; i++) {
-        ctx.fillRect(px + 6 + pseudoAlea(x, y, i) * (CW - 14), py + 5 + pseudoAlea(x, y, i + 9) * (CH - 12), 2, 2);
+        ctx.fillRect(
+          px + 6 + pseudoAlea(x, y, i) * (CW - 14),
+          py + 5 + pseudoAlea(x, y, i + 9) * (CH - 12),
+          2,
+          2,
+        );
       }
       ctx.strokeStyle = "rgba(160,150,125,0.35)";
       ctx.lineWidth = 1;
@@ -427,7 +469,13 @@ function couchePourEtat(sel, px, py, x, y, t) {
         const phase = (t / 900 + pseudoAlea(x, y, i) * 3) % 1;
         ctx.fillStyle = `rgba(150,110,70,${0.7 - phase * 0.6})`;
         ctx.beginPath();
-        ctx.arc(px + 12 + pseudoAlea(x, y, i + 3) * (CW - 24), py + 10 + pseudoAlea(x, y, i + 6) * (CH - 20), 2 + phase * 4, 0, Math.PI * 2);
+        ctx.arc(
+          px + 12 + pseudoAlea(x, y, i + 3) * (CW - 24),
+          py + 10 + pseudoAlea(x, y, i + 6) * (CH - 20),
+          2 + phase * 4,
+          0,
+          Math.PI * 2,
+        );
         ctx.fill();
       }
       break;
@@ -508,7 +556,9 @@ function dessinerCaravane(joueur, pos, info, t) {
   let py = origineY() + pos.y * CH + CH * 0.86 - e;
   const sens = orientation[joueur];
   const marche = Math.abs(pos.x - info.x) + Math.abs(pos.y - info.y) > 0.05;
-  const rebond = marche ? Math.abs(Math.sin(t / 90)) * 4 : Math.sin(t / 600 + (joueur === "J1" ? 0 : 2)) * 1.2;
+  const rebond = marche
+    ? Math.abs(Math.sin(t / 90)) * 4
+    : Math.sin(t / 600 + (joueur === "J1" ? 0 : 2)) * 1.2;
   const tremble = info.chameau === "Panique" ? Math.sin(t / 35) * 1.8 : 0;
   const enfonce = info.enlisee ? 9 : 0;
   py += enfonce;
@@ -532,7 +582,12 @@ function dessinerCaravane(joueur, pos, info, t) {
   ctx.lineCap = "round";
   ctx.lineWidth = 4;
   const pas = marche ? Math.sin(t / 90) * 5 : 0;
-  for (const [dx, dec] of [[-12, pas], [-6, -pas], [8, -pas], [14, pas]]) {
+  for (const [dx, dec] of [
+    [-12, pas],
+    [-6, -pas],
+    [8, -pas],
+    [14, pas],
+  ]) {
     ctx.beginPath();
     ctx.moveTo(dx, -13);
     ctx.lineTo(dx + dec * 0.6, 0);
@@ -602,7 +657,15 @@ function dessinerOndes(t) {
     ctx.globalAlpha = 1 - age;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.ellipse(origineX() + o.x * CW + CW / 2, origineY() + o.y * CH + CH / 2, 10 + age * 40, 6 + age * 24, 0, 0, Math.PI * 2);
+    ctx.ellipse(
+      origineX() + o.x * CW + CW / 2,
+      origineY() + o.y * CH + CH / 2,
+      10 + age * 40,
+      6 + age * 24,
+      0,
+      0,
+      Math.PI * 2,
+    );
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
@@ -627,7 +690,13 @@ function dessinerSurbrillances(t) {
     ctx.strokeStyle = carteChoisie ? "#7b5ea7" : COULEUR_JOUEUR[etat.joueur];
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.roundRect(origineX() + survol.x * CW + 1, origineY() + survol.y * CH + 1, CW - 2, CH - 2, 7);
+    ctx.roundRect(
+      origineX() + survol.x * CW + 1,
+      origineY() + survol.y * CH + 1,
+      CW - 2,
+      CH - 2,
+      7,
+    );
     ctx.stroke();
   }
 }
@@ -688,7 +757,7 @@ function dessiner(t) {
     ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.lineWidth = 2;
     for (let i = 0; i < 5; i++) {
-      const yy = ((t / 40 + i * 130) % hauteur);
+      const yy = (t / 40 + i * 130) % hauteur;
       ctx.beginPath();
       for (let x = 0; x <= largeur; x += 12) {
         ctx.lineTo(x, yy + Math.sin(x / 18 + t / 300) * 3);
@@ -765,9 +834,9 @@ toile.addEventListener("click", (e) => {
   }
 });
 
-document.querySelectorAll("[data-cmd]").forEach((b) =>
-  b.addEventListener("click", () => envoyer(b.dataset.cmd)),
-);
+document
+  .querySelectorAll("[data-cmd]")
+  .forEach((b) => b.addEventListener("click", () => envoyer(b.dataset.cmd)));
 document.querySelectorAll("[data-carte]").forEach((b) =>
   b.addEventListener("click", () => {
     carteChoisie = carteChoisie === b.dataset.carte ? null : b.dataset.carte;
@@ -781,10 +850,16 @@ el("nouvelle").addEventListener("click", () => {
 });
 
 const TOUCHES_DIRECTION = {
-  ArrowUp: "n", w: "n", z: "n",
-  ArrowDown: "s", s: "s",
-  ArrowLeft: "o", a: "o", q: "o",
-  ArrowRight: "e", d: "e",
+  ArrowUp: "n",
+  w: "n",
+  z: "n",
+  ArrowDown: "s",
+  s: "s",
+  ArrowLeft: "o",
+  a: "o",
+  q: "o",
+  ArrowRight: "e",
+  d: "e",
 };
 
 document.addEventListener("keydown", (e) => {

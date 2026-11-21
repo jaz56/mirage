@@ -33,9 +33,7 @@ export class BoucleDeJeu {
     while (!this.partie.estTerminee()) {
       const joueur = this.partie.joueurCourant();
       this.annoncerPhase();
-      sortie(
-        `\n=== Tour ${this.partie.tour()} | ${joueur} | ${this.partie.paRestants()} PA ===`,
-      );
+      sortie(`\n=== Tour ${this.partie.tour()} | ${joueur} | ${this.partie.paRestants()} PA ===`);
       const strategie = this.options.strategies?.[joueur];
       const continuer = strategie
         ? this.jouerIA(joueur, strategie)

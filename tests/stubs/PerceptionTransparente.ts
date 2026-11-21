@@ -7,32 +7,33 @@ import type {
   Position,
   Vue,
 } from "../../src/contrats";
+import { VueReelle } from "../../src/perception";
 
 /**
- * Stub du module perception/ (Nour) : une perception sans aucune déformation, qui montre la
- * réalité telle quelle (ou "?" partout si on ne lui donne pas de plateau) et qui note ce qu'on
- * lui envoie, pour que les autres modules puissent le vérifier.
+ * Perception sans aucune déformation : la vue est toujours la réalité (ou "?" partout si on ne
+ * donne pas de plateau). Elle note aussi ce qu'on lui envoie, pour que les autres modules
+ * (temps/) puissent le vérifier dans leurs tests.
  */
 export class PerceptionTransparente implements Perception {
   readonly cartesRecues: Array<{ carte: NomCarte; cible: Position }> = [];
   readonly phasesRecues: NomPhase[] = [];
   finsDeTour = 0;
 
-  constructor(private readonly plateau?: Plateau) {}
+  private readonly vue: Vue;
+
+  constructor(plateau?: Plateau) {
+    this.vue =
+      plateau === undefined
+        ? { voir: (): CaseVue => ({ terrain: "?", etat: "?", balise: false }) }
+        : new VueReelle(plateau);
+  }
 
   surPhase(phase: NomPhase): void {
     this.phasesRecues.push(phase);
   }
 
   vueActuelle(): Vue {
-    return {
-      voir: (p: Position): CaseVue => {
-        const c = this.plateau?.get(p);
-        return c === undefined
-          ? { terrain: "?", etat: "?", balise: false }
-          : { terrain: c.terrain.nom, etat: c.getEtat(), balise: c.aBalise() };
-      },
-    };
+    return this.vue;
   }
 
   appliquerCarte(carte: NomCarte, cible: Position): void {

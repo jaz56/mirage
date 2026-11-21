@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { ActionImpossible, Avancer, Boire, JouerMirage, PoserBalise, Sonder } from "../../src/temps";
+import {
+  ActionImpossible,
+  Avancer,
+  Boire,
+  JouerMirage,
+  PoserBalise,
+  Sonder,
+} from "../../src/temps";
 import { creerMonde } from "./helpers/monde";
 
 describe("Avancer", () => {

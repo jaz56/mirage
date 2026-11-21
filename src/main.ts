@@ -4,7 +4,12 @@ import { FabriqueCaravane, FabriquePlateauAleatoire } from "./lac";
 import { PerceptionProvisoire } from "./perceptionProvisoire";
 import { AIDE, BoucleDeJeu, Clavier, Partie } from "./temps";
 
-const SYMBOLES: Record<NomTerrain, string> = { croute: ".", dune: "^", oasis: "O", "puits-sec": "X" };
+const SYMBOLES: Record<NomTerrain, string> = {
+  croute: ".",
+  dune: "^",
+  oasis: "O",
+  "puits-sec": "X",
+};
 
 function afficher(etat: EtatPartie, joueur: IdJoueur): void {
   const vue = etat.perception(joueur).vueActuelle();
