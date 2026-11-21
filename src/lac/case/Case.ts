@@ -8,22 +8,21 @@ import type {
 } from "../../contrats";
 import { creerEtatSel, type EtatSel } from "./EtatSel";
 
-
 /** Une case du lac : un terrain partagé (Flyweight) et un état du sel (State). */
 
 export class Case implements CaseLac {
-    private etat: EtatSel;
-    private balise =false;
+  private etat: EtatSel;
+  private balise = false;
 
-    constructor(
-        readonly position: Position,
-        readonly terrain: TypeTerrain,
-        etatInitial : NomEtatSel ="Solide",
-    ){
-        this.etat =creerEtatSel(etatInitial);
-    }
+  constructor(
+    readonly position: Position,
+    readonly terrain: TypeTerrain,
+    etatInitial: NomEtatSel = "Solide",
+  ) {
+    this.etat = creerEtatSel(etatInitial);
+  }
 
-    getEtat(): NomEtatSel {
+  getEtat(): NomEtatSel {
     return this.etat.nom;
   }
 
@@ -35,16 +34,14 @@ export class Case implements CaseLac {
     this.balise = true;
   }
 
-    traverser(c:CaravaneJeu):void{
+  traverser(c: CaravaneJeu): void {
     this.etat.traverser(c);
+  }
+
+  surPhase(phase: NomPhase): void {
+    const suivant = this.etat.suivant(phase);
+    if (suivant != this.etat.nom) {
+      this.etat = creerEtatSel(suivant);
     }
-
-    surPhase(phase:NomPhase):void{
-        const suivant =this.etat.suivant(phase);
-        if(suivant != this.etat.nom){
-            this.etat =creerEtatSel(suivant);
-        }
-    }
-
-
+  }
 }

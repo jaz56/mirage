@@ -1,0 +1,621 @@
+:root {
+  --encre: #2b2118;
+  --carte: rgba(255, 250, 240, 0.9);
+  --carte-bord: rgba(80, 55, 30, 0.18);
+  --j1: #e8742a;
+  --j2: #1f9db0;
+  --accent: #b5521b;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--encre);
+  background: #f4c98a;
+  transition: background 1.2s;
+}
+
+/* ---- Ciel : change avec la phase du Soleil ---- */
+.ciel {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--c1) 0%, var(--c2) 55%, var(--c3) 100%);
+  transition: background 1.2s;
+}
+body[data-phase="Aube"] .ciel {
+  --c1: #f7b6a6;
+  --c2: #fbd9a8;
+  --c3: #f3e2bd;
+}
+body[data-phase="Matin"] .ciel {
+  --c1: #8fcdf2;
+  --c2: #cfeaf6;
+  --c3: #f5e6c0;
+}
+body[data-phase="Zenith"] .ciel {
+  --c1: #ffe9a0;
+  --c2: #fff3c6;
+  --c3: #fbe29a;
+}
+body[data-phase="Crepuscule"] .ciel {
+  --c1: #5b4a8f;
+  --c2: #e0775f;
+  --c3: #f2b66b;
+}
+body[data-phase="Nuit"] .ciel {
+  --c1: #0a1030;
+  --c2: #18244f;
+  --c3: #2b3a6b;
+}
+
+body[data-phase="Nuit"] .ciel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff, transparent),
+    radial-gradient(1px 1px at 28% 8%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 44% 24%, #fff, transparent),
+    radial-gradient(1px 1px at 63% 12%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 78% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 90% 10%, #fff, transparent),
+    radial-gradient(1px 1px at 35% 38%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 8% 44%, #fff, transparent);
+  animation: scintille 3s ease-in-out infinite alternate;
+}
+@keyframes scintille {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.astre {
+  position: absolute;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  top: 7%;
+  right: 8%;
+  background: radial-gradient(circle at 40% 40%, #fffbe0, #ffd45c 60%, #ffb02e);
+  box-shadow: 0 0 80px 30px rgba(255, 200, 80, 0.55);
+  transition: all 1.2s;
+}
+body[data-phase="Aube"] .astre {
+  top: 22%;
+  right: 4%;
+  transform: scale(0.8);
+  background: radial-gradient(circle, #fff1d0, #ff9a6a);
+}
+body[data-phase="Matin"] .astre {
+  top: 12%;
+  right: 14%;
+}
+body[data-phase="Zenith"] .astre {
+  top: 3%;
+  right: 40%;
+  transform: scale(1.25);
+  box-shadow: 0 0 120px 50px rgba(255, 220, 90, 0.7);
+}
+body[data-phase="Crepuscule"] .astre {
+  top: 26%;
+  right: 82%;
+  transform: scale(1);
+  background: radial-gradient(circle, #ffd9a0, #ff6a3d);
+  box-shadow: 0 0 90px 30px rgba(255, 110, 60, 0.5);
+}
+body[data-phase="Nuit"] .astre {
+  top: 10%;
+  right: 18%;
+  width: 64px;
+  height: 64px;
+  background: radial-gradient(circle at 35% 35%, #fff, #d7ddf0 70%);
+  box-shadow: 0 0 60px 18px rgba(200, 215, 255, 0.35);
+}
+
+/* ---- Mise en page ---- */
+.jeu {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.bandeau {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.bandeau h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  letter-spacing: 0.35em;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+body[data-phase="Nuit"] .bandeau,
+body[data-phase="Crepuscule"] .bandeau {
+  color: #fff;
+}
+.bandeau p {
+  margin: 0;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.toile {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+canvas {
+  max-width: 100%;
+  max-height: calc(100vh - 110px);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(60, 35, 10, 0.35);
+  background: #d9b97a;
+  cursor: pointer;
+}
+canvas.cible {
+  cursor: crosshair;
+}
+
+.inspecteur {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  background: rgba(30, 20, 10, 0.72);
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ---- Panneau ---- */
+.panneau {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--carte-bord);
+  border-radius: 16px;
+  padding: 14px 16px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(60, 35, 10, 0.12);
+}
+.carte h2 {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+h2 small {
+  font-weight: 500;
+  opacity: 0.65;
+  font-size: 0.75rem;
+}
+
+.joueur {
+  border-left: 8px solid var(--j1);
+}
+.joueur[data-joueur="J2"] {
+  border-left-color: var(--j2);
+}
+.joueur-tete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+}
+.pastille {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--j1);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px var(--j1);
+}
+.joueur[data-joueur="J2"] .pastille {
+  background: var(--j2);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px var(--j2);
+}
+.tour {
+  margin-left: auto;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+.ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.etiquette {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+.pips {
+  display: flex;
+  gap: 5px;
+  min-height: 22px;
+  align-items: center;
+}
+.pip {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+}
+.pip.pa {
+  background: #f2a93b;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+}
+.pip.pa.vide {
+  background: rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+}
+.pip.goutte {
+  background: transparent;
+  font-size: 1.1rem;
+}
+.pip.carte-p {
+  background: #7b5ea7;
+  color: #fff;
+}
+.vide-txt {
+  opacity: 0.5;
+  font-size: 0.85rem;
+}
+
+.badge {
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #cfe8cf;
+}
+.badge.Assoiffe {
+  background: #ffd9a0;
+}
+.badge.Panique {
+  background: #ffb4a8;
+  animation: tremble 0.3s infinite;
+}
+.badge.enlisee {
+  background: #d7b79a;
+}
+@keyframes tremble {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+.frise {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.etape {
+  flex: 1;
+  text-align: center;
+  padding: 6px 0;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  opacity: 0.45;
+  transition: all 0.4s;
+}
+.etape span {
+  display: block;
+  font-size: 1.3rem;
+}
+.etape.actuelle {
+  opacity: 1;
+  background: rgba(255, 190, 80, 0.45);
+  font-weight: 700;
+  transform: translateY(-2px);
+}
+.note {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  opacity: 0.75;
+}
+
+/* ---- Commandes ---- */
+.commandes {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.croix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 4px;
+  width: 140px;
+  height: 140px;
+}
+.croix button {
+  padding: 0;
+  font-size: 1rem;
+}
+.croix .haut {
+  grid-column: 2;
+  grid-row: 1;
+}
+.croix .gauche {
+  grid-column: 1;
+  grid-row: 2;
+}
+.croix .droite {
+  grid-column: 3;
+  grid-row: 2;
+}
+.croix .bas {
+  grid-column: 2;
+  grid-row: 3;
+}
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--carte-bord);
+  background: #fff8ea;
+  color: var(--encre);
+  border-radius: 10px;
+  padding: 8px 12px;
+  text-align: left;
+  transition:
+    transform 0.08s,
+    background 0.15s,
+    box-shadow 0.15s;
+}
+button:hover:not(:disabled) {
+  background: #ffe9c2;
+  box-shadow: 0 3px 10px rgba(120, 70, 20, 0.2);
+}
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button small {
+  float: right;
+  opacity: 0.6;
+  font-size: 0.72rem;
+  margin-top: 3px;
+}
+.croix button {
+  text-align: center;
+}
+.fin {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+.fin:hover:not(:disabled) {
+  background: #c9632a;
+}
+.cartes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+.cartes button.choisie {
+  background: #7b5ea7;
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(123, 94, 167, 0.35);
+}
+
+.journal-carte {
+  min-height: 120px;
+}
+.journal {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 150px;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.journal li {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
+}
+.journal li.phase {
+  background: rgba(255, 190, 80, 0.3);
+  font-weight: 600;
+}
+.journal li.fin-partie {
+  background: rgba(120, 200, 120, 0.4);
+  font-weight: 700;
+}
+
+.legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.75rem;
+  padding: 0 4px;
+}
+body[data-phase="Nuit"] .legende {
+  color: #fff;
+}
+.pt {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  margin-right: 5px;
+  vertical-align: -1px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+.pt.croute {
+  background: #efe9dc;
+}
+.pt.dune {
+  background: #e2b25f;
+}
+.pt.oasis {
+  background: #5fb36b;
+}
+.pt.puits {
+  background: #3b2f2a;
+}
+.pt.boue {
+  background: #7a5a3a;
+}
+.pt.fragile {
+  background: #cfe6f0;
+}
+.pt.brume {
+  background: #4a5670;
+}
+
+.discret {
+  align-self: flex-start;
+  background: transparent;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* ---- Toasts & écran ---- */
+.toasts {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+.toast {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(35, 25, 15, 0.9);
+  color: #fff;
+  font-size: 0.9rem;
+  max-width: 90vw;
+  animation: apparait 0.25s ease-out;
+}
+.toast.erreur {
+  background: rgba(160, 40, 30, 0.95);
+}
+.toast.info {
+  background: rgba(40, 90, 120, 0.95);
+}
+@keyframes apparait {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ecran {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  place-items: center;
+  background: rgba(20, 12, 4, 0.78);
+  backdrop-filter: blur(8px);
+}
+.ecran.visible {
+  display: grid;
+}
+.ecran-boite {
+  background: #fff8ea;
+  border-radius: 22px;
+  padding: 36px 44px;
+  text-align: center;
+  max-width: 480px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  animation: apparait 0.35s ease-out;
+}
+.ecran-boite h2 {
+  margin: 0 0 12px;
+  font-size: 2.2rem;
+  letter-spacing: 0.25em;
+}
+.ecran-boite p {
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+.grand {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 34px;
+  text-align: center;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 14px;
+}
+.grand:hover:not(:disabled) {
+  background: #c9632a;
+}
+
+@media (max-width: 980px) {
+  .jeu {
+    grid-template-columns: 1fr;
+  }
+  canvas {
+    max-height: none;
+  }
+}

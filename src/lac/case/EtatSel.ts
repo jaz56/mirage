@@ -5,12 +5,12 @@ import { CrouteFragile } from "./CrouteFragile";
 import { Solide } from "./Solide";
 
 /** Patron State : l'état du sel décide de la suite et de l'effet d'un passage. */
-export interface EtatSel{
-    readonly nom:NomEtatSel;
-    /** Nom de l'état après l'arrivée d'une phase du Soleil (le même nom = on ne change pas). */
-    suivant(phase:NomPhase):NomEtatSel;
-    /** Effet sur une caravane qui traverse la case. */
-    traverser(caravane:CaravaneJeu):void;
+export interface EtatSel {
+  readonly nom: NomEtatSel;
+  /** Nom de l'état après l'arrivée d'une phase du Soleil (le même nom = on ne change pas). */
+  suivant(phase: NomPhase): NomEtatSel;
+  /** Effet sur une caravane qui traverse la case. */
+  traverser(caravane: CaravaneJeu): void;
 }
 
 export function creerEtatSel(nom: NomEtatSel): EtatSel {

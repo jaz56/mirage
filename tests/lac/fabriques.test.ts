@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { NomTerrain } from "../../src/contrats";
-import {
-  CARTES_DEPART,
-  HAUTEUR,
-  LARGEUR,
-  OUTRES_DEPART,
-} from "../../src/config/constantes";
+import { CARTES_DEPART, HAUTEUR, LARGEUR, OUTRES_DEPART } from "../../src/config/constantes";
 import { FabriqueCaravane, FabriquePlateau, FabriquePlateauAleatoire } from "../../src/lac";
 import { aleaAvecGraine } from "./helpers/alea";
 
