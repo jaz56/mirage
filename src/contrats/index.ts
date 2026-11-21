@@ -4,3 +4,4 @@ export type * from "./temps";
 export type * from "./lac";
 export type * from "./perception";
 export type * from "./partie";
+export type * from "./actions";
