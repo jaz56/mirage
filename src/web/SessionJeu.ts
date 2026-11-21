@@ -1,11 +1,12 @@
 // Une partie pilotée par l'interface graphique : même règles que la console (analyserCommande,
 // Partie, Soleil), mais l'état est renvoyé en JSON au lieu d'être affiché en texte.
 import type { CaseVue, IdJoueur, NomEtatChameau, NomPhase } from "../contrats";
-import { FabriqueCaravane, FabriquePlateauAleatoire } from "../lac";
-import { PerceptionProvisoire } from "../perceptionProvisoire";
+import { demarrerPartie } from "../assemblage";
 import { ActionImpossible, analyserCommande, Partie, Sonder, Soleil } from "../temps";
 
 export interface InfosCaravane {
+  /** false : la caravane adverse est dans une case que ce joueur ne voit pas (x, y sans sens). */
+  readonly visible: boolean;
   readonly x: number;
   readonly y: number;
   readonly outres: number;
@@ -49,14 +50,7 @@ export class SessionJeu {
 
   /** Nouvelle partie : nouveau lac aléatoire, nouvelles caravanes. */
   nouvelle(): void {
-    const plateau = new FabriquePlateauAleatoire().creer();
-    const fabrique = new FabriqueCaravane();
-    this.partie = Partie.getInstance();
-    this.partie.initialiser({
-      plateau,
-      caravanes: { J1: fabrique.creer("J1"), J2: fabrique.creer("J2") },
-      perceptions: { J1: new PerceptionProvisoire(plateau), J2: new PerceptionProvisoire(plateau) },
-    });
+    this.partie = demarrerPartie();
     this.journal = [];
     this.noter(`Phase : ${this.partie.phase()} - ${Soleil.getInstance().getDescription()}`);
   }
@@ -139,15 +133,32 @@ export class SessionJeu {
       terminee: partie.estTerminee(),
       vainqueur: partie.vainqueur(),
       grille,
-      caravanes: { J1: this.infos("J1"), J2: this.infos("J2") },
+      caravanes: {
+        J1: this.infos("J1", joueur),
+        J2: this.infos("J2", joueur),
+      },
       journal: [...this.journal],
     };
   }
 
-  private infos(joueur: IdJoueur): InfosCaravane {
+  /** Infos d'une caravane vues par `observateur` : l'adversaire caché n'est pas révélé. */
+  private infos(joueur: IdJoueur, observateur: IdJoueur): InfosCaravane {
     const caravane = this.partie.caravane(joueur);
     const { x, y } = caravane.getPosition();
+    const vue = this.partie.perception(observateur).vueActuelle();
+    if (joueur !== observateur && vue.voir({ x, y }).terrain === "?") {
+      return {
+        visible: false,
+        x: -1,
+        y: -1,
+        outres: 0,
+        cartes: 0,
+        chameau: "Repose",
+        enlisee: false,
+      };
+    }
     return {
+      visible: true,
       x,
       y,
       outres: caravane.outres(),

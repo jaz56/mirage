@@ -122,7 +122,8 @@ function appliquer(nouveau) {
   if (premier) {
     dimensionner();
     for (const j of ["J1", "J2"]) {
-      affiche[j] = { x: etat.caravanes[j].x, y: etat.caravanes[j].y };
+      const c = etat.caravanes[j];
+      affiche[j] = c.visible ? { x: c.x, y: c.y } : null;
     }
     orientation.J1 = 1;
     orientation.J2 = -1;
@@ -771,6 +772,13 @@ function animer(t) {
   if (etat) {
     for (const j of ["J1", "J2"]) {
       const cible = etat.caravanes[j];
+      if (!cible.visible) {
+        affiche[j] = null; // caravane adverse cachée dans le brouillard
+        continue;
+      }
+      if (affiche[j] === null) {
+        affiche[j] = { x: cible.x, y: cible.y };
+      }
       const a = affiche[j];
       a.x += (cible.x - a.x) * 0.18;
       a.y += (cible.y - a.y) * 0.18;

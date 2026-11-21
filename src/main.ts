@@ -1,8 +1,7 @@
-// Seul fichier qui assemble les modules. Il crée les objets et les injecte dans la partie.
+// Point d'entrée de la console : l'assemblage des modules est fait par assemblage.ts.
 import type { EtatPartie, IdJoueur, NomTerrain } from "./contrats";
-import { FabriqueCaravane, FabriquePlateauAleatoire } from "./lac";
-import { PerceptionProvisoire } from "./perceptionProvisoire";
-import { AIDE, BoucleDeJeu, Clavier, Partie } from "./temps";
+import { demarrerPartie } from "./assemblage";
+import { AIDE, BoucleDeJeu, Clavier } from "./temps";
 
 const SYMBOLES: Record<NomTerrain, string> = {
   croute: ".",
@@ -45,14 +44,7 @@ function afficher(etat: EtatPartie, joueur: IdJoueur): void {
 // ---------------------------------------------------------------------------------------
 
 async function main(): Promise<void> {
-  const plateau = new FabriquePlateauAleatoire().creer();
-  const fabrique = new FabriqueCaravane();
-  const partie = Partie.getInstance();
-  partie.initialiser({
-    plateau,
-    caravanes: { J1: fabrique.creer("J1"), J2: fabrique.creer("J2") },
-    perceptions: { J1: new PerceptionProvisoire(plateau), J2: new PerceptionProvisoire(plateau) },
-  });
+  const partie = demarrerPartie();
 
   console.log("MIRAGE : traverse le lac de sel avant ton adversaire.");
   console.log("J1 part du haut et va vers le bas, J2 part du bas et va vers le haut.\n");
