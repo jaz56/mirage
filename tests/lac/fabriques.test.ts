@@ -36,6 +36,18 @@ describe("FabriquePlateauAleatoire", () => {
     }
   });
 
+  it("relie toujours les deux cases de départ par un chemin praticable (500 essais)", () => {
+    const milieu = Math.floor(LARGEUR / 2);
+    const departJ1 = { x: milieu, y: 0 };
+    const departJ2 = { x: milieu, y: HAUTEUR - 1 };
+    for (let graine = 0; graine < 500; graine++) {
+      const plateau = new FabriquePlateauAleatoire(aleaAvecGraine(graine)).creer();
+      expect(plateau.get(departJ1)?.terrain.nom, `graine ${graine}`).toBe("croute");
+      expect(plateau.get(departJ2)?.terrain.nom, `graine ${graine}`).toBe("croute");
+      expect(plateau.existeCheminEntre(departJ1, departJ2), `graine ${graine}`).toBe(true);
+    }
+  });
+
   it("garantit un chemin même si le hasard ne tire que des puits secs", () => {
     const toujoursZero = () => 0.999999;
     const plateau = new FabriquePlateauAleatoire(toujoursZero).creer();

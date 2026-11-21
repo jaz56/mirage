@@ -68,3 +68,20 @@ describe("Plateau : chemin praticable", () => {
     expect(PlateauFixe.depuis([".X", "X."]).existeCheminPraticable()).toBe(false);
   });
 });
+
+describe("Plateau : chemin entre deux cases", () => {
+  it("trouve un chemin entre deux cases précises", () => {
+    const plateau = PlateauFixe.depuis(["...", "X.X", "..."]);
+    expect(plateau.existeCheminEntre({ x: 0, y: 0 }, { x: 2, y: 2 })).toBe(true);
+  });
+
+  it("refuse quand une case est enfermée par des puits secs", () => {
+    const plateau = PlateauFixe.depuis([".X.", "X..", "..."]);
+    expect(plateau.existeCheminEntre({ x: 0, y: 0 }, { x: 2, y: 2 })).toBe(false);
+  });
+
+  it("refuse une case hors du plateau", () => {
+    const plateau = PlateauFixe.depuis(["..."]);
+    expect(plateau.existeCheminEntre({ x: 0, y: 0 }, { x: 5, y: 0 })).toBe(false);
+  });
+});
