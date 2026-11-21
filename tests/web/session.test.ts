@@ -45,6 +45,13 @@ describe("SessionJeu (interface graphique)", () => {
     expect(session.etat().joueur).toBe("J2");
   });
 
+  it("ne révèle pas la caravane adverse tant qu'elle est dans le brouillard", () => {
+    const { caravanes } = new SessionJeu().etat();
+    expect(caravanes.J1.visible).toBe(true);
+    expect(caravanes.J2.visible).toBe(false);
+    expect(caravanes.J2).toMatchObject({ x: -1, y: -1 });
+  });
+
   it("nouvelle() remet la partie à zéro", () => {
     const session = new SessionJeu();
     session.commande("fin");

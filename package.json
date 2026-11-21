@@ -4,7 +4,8 @@
   "description": "Mirage : la traversée du Chott el-Djerid — jeu de stratégie et de bluff (projet Design Patterns, ENICarthage)",
   "private": true,
   "scripts": {
-    "start": "ts-node src/main.ts",
+    "start": "ts-node src/web/mainWeb.ts",
+    "console": "ts-node src/main.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
