@@ -1,5 +1,6 @@
 // Seule porte d'entrée du module temps/.
-export { Partie, type ConfigurationPartie, type Vainqueur } from "./Partie";
+export { Partie, type ConfigurationPartie, type EntreeReplay, type Vainqueur } from "./Partie";
+export { formaterReplay, texteVainqueur } from "./Replay";
 export { Soleil } from "./Soleil";
 export { BoucleDeJeu, type OptionsBoucle, type Resultat } from "./BoucleDeJeu";
 export { Clavier } from "./console/Clavier";
@@ -12,3 +13,5 @@ export { PoserBalise } from "./actions/PoserBalise";
 export { Boire } from "./actions/Boire";
 export { JouerMirage } from "./actions/JouerMirage";
 export type { Direction } from "./actions/directions";
+export { FabriqueActionsJeu } from "./FabriqueActionsJeu";
+export { jouerTourIA } from "./TourIA";

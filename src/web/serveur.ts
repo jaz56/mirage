@@ -3,6 +3,7 @@ import { exec } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import path from "node:path";
+import { ADVERSAIRES } from "../assemblage";
 import { SessionJeu } from "./SessionJeu";
 
 const DOSSIER_PUBLIC = path.join(__dirname, "public");
@@ -62,7 +63,13 @@ async function traiter(
     return;
   }
   if (url.pathname === "/api/nouvelle" && methode === "POST") {
-    session.nouvelle();
+    const donnees: unknown = JSON.parse((await lireCorps(requete)) || "{}");
+    const demande =
+      typeof donnees === "object" && donnees !== null && "adversaire" in donnees
+        ? (donnees as { adversaire: unknown }).adversaire
+        : "humain";
+    const adversaire = ADVERSAIRES.find((a) => a === demande) ?? "humain";
+    session.nouvelle(adversaire);
     repondreJson(reponse, 200, { ok: true, messages: [], etat: session.etat() });
     return;
   }

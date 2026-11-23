@@ -1,8 +1,17 @@
 // Une partie pilotée par l'interface graphique : même règles que la console (analyserCommande,
 // Partie, Soleil), mais l'état est renvoyé en JSON au lieu d'être affiché en texte.
-import type { CaseVue, IdJoueur, NomEtatChameau, NomPhase } from "../contrats";
-import { demarrerPartie } from "../assemblage";
-import { ActionImpossible, analyserCommande, Partie, Sonder, Soleil } from "../temps";
+import type { CaseVue, IdJoueur, NomEtatChameau, NomPhase, StrategieIA } from "../contrats";
+import { assemblerPartie, type Adversaire } from "../assemblage";
+import {
+  ActionImpossible,
+  analyserCommande,
+  jouerTourIA,
+  Partie,
+  Sonder,
+  Soleil,
+  texteVainqueur,
+  type EntreeReplay,
+} from "../temps";
 
 export interface InfosCaravane {
   /** false : la caravane adverse est dans une case que ce joueur ne voit pas (x, y sans sens). */
@@ -29,6 +38,10 @@ export interface EtatWeb {
   readonly grille: readonly (readonly CaseVue[])[];
   readonly caravanes: Readonly<Record<IdJoueur, InfosCaravane>>;
   readonly journal: readonly string[];
+  /** Contre qui J1 joue : un humain (même écran) ou une des IA. */
+  readonly adversaire: Adversaire;
+  /** Toutes les actions de la partie, une fois terminée (vide avant). */
+  readonly replay: readonly EntreeReplay[];
 }
 
 export interface Reponse {
@@ -43,14 +56,19 @@ const TAILLE_JOURNAL = 60;
 export class SessionJeu {
   private partie: Partie = Partie.getInstance();
   private journal: string[] = [];
+  private strategies: Partial<Record<IdJoueur, StrategieIA>> = {};
+  private adversaire: Adversaire = "humain";
 
   constructor() {
     this.nouvelle();
   }
 
   /** Nouvelle partie : nouveau lac aléatoire, nouvelles caravanes. */
-  nouvelle(): void {
-    this.partie = demarrerPartie();
+  nouvelle(adversaire: Adversaire = "humain"): void {
+    const assemblee = assemblerPartie(adversaire);
+    this.partie = assemblee.partie;
+    this.strategies = assemblee.strategies;
+    this.adversaire = adversaire;
     this.journal = [];
     this.noter(`Phase : ${this.partie.phase()} - ${Soleil.getInstance().getDescription()}`);
   }
@@ -60,6 +78,7 @@ export class SessionJeu {
     const messages: string[] = [];
     const joueur = this.partie.joueurCourant();
     const phaseAvant = this.partie.phase();
+    const etaitTerminee = this.partie.estTerminee();
     const commande = analyserCommande(texte, joueur, this.partie);
     let ok = true;
 
@@ -97,13 +116,16 @@ export class SessionJeu {
         break;
     }
 
+    if (ok) {
+      this.laisserJouerLOrdinateur(messages);
+    }
     this.annoncerPhase(phaseAvant, messages);
     for (const message of messages) {
       if (ok) {
         this.noter(message);
       }
     }
-    if (this.partie.estTerminee()) {
+    if (this.partie.estTerminee() && !etaitTerminee) {
       this.noter(this.messageFinal());
     }
     return { ok, messages, etat: this.etat() };
@@ -138,6 +160,8 @@ export class SessionJeu {
         J2: this.infos("J2", joueur),
       },
       journal: [...this.journal],
+      adversaire: this.adversaire,
+      replay: partie.estTerminee() ? [...partie.replay()] : [],
     };
   }
 
@@ -168,6 +192,19 @@ export class SessionJeu {
     };
   }
 
+  /** Tant que c'est au tour d'un joueur piloté par une IA, la laisse jouer. */
+  private laisserJouerLOrdinateur(messages: string[]): void {
+    for (;;) {
+      const joueur = this.partie.joueurCourant();
+      const strategie = this.strategies[joueur];
+      if (this.partie.estTerminee() || strategie === undefined) {
+        return;
+      }
+      jouerTourIA(this.partie, joueur, strategie, () => {});
+      messages.push(`L'ordinateur (${joueur}) a joué son tour.`);
+    }
+  }
+
   private finDeTour(messages: string[]): void {
     const avant = this.partie.joueurCourant();
     this.partie.finDeTourJoueur();
@@ -192,9 +229,7 @@ export class SessionJeu {
   }
 
   private messageFinal(): string {
-    return this.partie.vainqueur() === "Egalite"
-      ? "Fin de la partie : égalité, personne n'a traversé le lac à temps."
-      : `Victoire de ${this.partie.vainqueur()} : sa caravane a traversé le lac !`;
+    return texteVainqueur(this.partie.vainqueur() ?? "Egalite");
   }
 
   private noter(message: string): void {

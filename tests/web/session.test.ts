@@ -60,4 +60,56 @@ describe("SessionJeu (interface graphique)", () => {
     expect(etat.joueur).toBe("J1");
     expect(etat.tour).toBe(1);
   });
+
+  describe("contre l'ordinateur", () => {
+    it("l'ordinateur joue tout seul le tour de J2 : la main revient à J1", () => {
+      const session = new SessionJeu();
+      session.nouvelle("prudente");
+      const reponse = session.commande("fin");
+      expect(reponse.etat.adversaire).toBe("prudente");
+      expect(reponse.etat.joueur).toBe("J1");
+      expect(reponse.etat.tour).toBe(2);
+      expect(reponse.messages.join(" ")).toContain("L'ordinateur (J2) a joué son tour");
+    });
+
+    it("fonctionne aussi avec l'ordinateur bluffeur, tour après tour", () => {
+      const session = new SessionJeu();
+      session.nouvelle("bluffeuse");
+      for (let i = 0; i < 6; i++) {
+        const etat = session.commande("fin").etat;
+        expect(etat.joueur === "J1" || etat.terminee).toBe(true);
+      }
+    });
+
+    it("garde les actions de l'ordinateur secrètes dans le journal pendant la partie", () => {
+      const session = new SessionJeu();
+      session.nouvelle("prudente");
+      const journal = session.commande("fin").etat.journal.join(" ");
+      expect(journal).not.toContain("J2 avance");
+    });
+  });
+
+  it("donne le replay complet une fois la partie terminée, et seulement alors", () => {
+    const session = new SessionJeu();
+    session.nouvelle("humain");
+    expect(session.commande("boire").etat.replay).toEqual([]);
+    let etat = session.etat();
+    for (let i = 0; i < 200 && !etat.terminee; i++) {
+      etat = session.commande("fin").etat;
+    }
+    expect(etat.terminee).toBe(true);
+    expect(etat.vainqueur).toBe("Egalite");
+    expect(etat.replay[0]).toMatchObject({ tour: 1, joueur: "J1", texte: "J1 boit une outre" });
+  });
+
+  it("n'enregistre qu'une seule fois la phrase de fin dans le journal", () => {
+    const session = new SessionJeu();
+    let etat = session.etat();
+    for (let i = 0; i < 200 && !etat.terminee; i++) {
+      etat = session.commande("fin").etat;
+    }
+    session.commande("fin"); // refusée : la partie est finie
+    const fins = session.etat().journal.filter((ligne) => ligne.includes("Égalité"));
+    expect(fins).toHaveLength(1);
+  });
 });

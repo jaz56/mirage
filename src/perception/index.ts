@@ -3,3 +3,5 @@
 export { Perception } from "./Perception";
 export { VueReelle } from "./VueReelle";
 export { RenduConsole } from "./RenduConsole";
+export { Prudente } from "./ia/Prudente";
+export { Bluffeuse } from "./ia/Bluffeuse";

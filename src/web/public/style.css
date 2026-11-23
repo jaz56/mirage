@@ -619,3 +619,51 @@ body[data-phase="Nuit"] .legende {
     max-height: none;
   }
 }
+
+.ecran-boutons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: stretch;
+}
+.grand.secondaire {
+  background: #fff8ea;
+  color: var(--encre);
+  border: 1px solid var(--carte-bord);
+}
+.grand.secondaire:hover:not(:disabled) {
+  background: #ffe9c2;
+}
+.ecran-replay {
+  display: none;
+  margin-top: 20px;
+  max-height: 240px;
+  overflow-y: auto;
+  text-align: left;
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.05);
+}
+.ecran-replay.visible {
+  display: block;
+}
+.ecran-replay h3 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+}
+.replay-tour {
+  margin-top: 8px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.replay-ligne {
+  padding: 1px 0 1px 8px;
+  border-left: 3px solid transparent;
+}
+.replay-ligne.J1 {
+  border-left-color: var(--j1);
+}
+.replay-ligne.J2 {
+  border-left-color: var(--j2);
+}

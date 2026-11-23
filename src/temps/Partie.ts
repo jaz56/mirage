@@ -13,6 +13,14 @@ import { Soleil } from "./Soleil";
 
 export type Vainqueur = IdJoueur | "Egalite";
 
+/** Une action jouée, avec le moment où elle l'a été : sert au replay de fin de partie. */
+export interface EntreeReplay {
+  readonly tour: number;
+  readonly phase: NomPhase;
+  readonly joueur: IdJoueur;
+  readonly texte: string;
+}
+
 /** Ce que main.ts fournit à la partie : tout est injecté, rien n'est créé ici. */
 export interface ConfigurationPartie {
   readonly plateau: Plateau;
@@ -36,6 +44,7 @@ export class Partie implements EtatPartie {
   private joueur: IdJoueur = "J1";
   private pa = PA_PAR_TOUR;
   private actionsJouees: string[] = [];
+  private entreesReplay: EntreeReplay[] = [];
   private issue: Vainqueur | null = null;
 
   private constructor() {}
@@ -71,6 +80,7 @@ export class Partie implements EtatPartie {
     this.joueur = "J1";
     this.pa = PA_PAR_TOUR;
     this.actionsJouees = [];
+    this.entreesReplay = [];
     this.issue = null;
   }
 
@@ -111,6 +121,11 @@ export class Partie implements EtatPartie {
     return this.actionsJouees;
   }
 
+  /** Toutes les actions jouées avec leur tour et leur phase du Soleil (replay final). */
+  replay(): readonly EntreeReplay[] {
+    return this.entreesReplay;
+  }
+
   estTerminee(): boolean {
     return this.issue !== null;
   }
@@ -132,7 +147,14 @@ export class Partie implements EtatPartie {
     }
     action.executer();
     this.pa -= action.cout;
-    this.actionsJouees.push(action.description());
+    const texte = action.description();
+    this.actionsJouees.push(texte);
+    this.entreesReplay.push({
+      tour: this.tourCourant,
+      phase: this.phase(),
+      joueur: this.joueur,
+      texte,
+    });
     this.verifierVictoire();
   }
 

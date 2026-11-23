@@ -5,6 +5,8 @@ import { AIDE, analyserCommande } from "./console/commandes";
 import type { Entree } from "./console/Entree";
 import { Partie, type Vainqueur } from "./Partie";
 import { Soleil } from "./Soleil";
+import { formaterReplay } from "./Replay";
+import { jouerTourIA } from "./TourIA";
 
 export type Resultat = Vainqueur | "Abandon";
 
@@ -49,6 +51,8 @@ export class BoucleDeJeu {
         ? "\nFin de la partie : égalité, personne n'a traversé le lac à temps."
         : `\nVictoire de ${vainqueur} : sa caravane a traversé le lac !`,
     );
+    sortie(`
+${formaterReplay(this.partie)}`);
     return vainqueur;
   }
 
@@ -121,25 +125,7 @@ export class BoucleDeJeu {
 
   /** Tour d'un joueur piloté par une stratégie. */
   private jouerIA(joueur: IdJoueur, strategie: StrategieIA): boolean {
-    const actions = strategie.choisirActions(this.partie, this.partie.paRestants());
-    for (const action of actions) {
-      if (this.partie.estTerminee()) {
-        break;
-      }
-      try {
-        this.partie.executer(action);
-        this.options.sortie(`${joueur} (IA) : ${action.description()}`);
-      } catch (erreur) {
-        if (erreur instanceof ActionImpossible) {
-          this.options.sortie(`${joueur} (IA) : action refusée, ${erreur.message}`);
-          break;
-        }
-        throw erreur;
-      }
-    }
-    if (!this.partie.estTerminee() && this.partie.joueurCourant() === joueur) {
-      this.partie.finDeTourJoueur();
-    }
+    jouerTourIA(this.partie, joueur, strategie, this.options.sortie);
     return true;
   }
 }

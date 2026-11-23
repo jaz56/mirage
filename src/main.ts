@@ -1,6 +1,6 @@
 // Point d'entrée de la console : l'assemblage des modules est fait par assemblage.ts.
 import type { EtatPartie, IdJoueur, NomTerrain } from "./contrats";
-import { demarrerPartie } from "./assemblage";
+import { assemblerPartie, type Adversaire } from "./assemblage";
 import { AIDE, BoucleDeJeu, Clavier } from "./temps";
 
 const SYMBOLES: Record<NomTerrain, string> = {
@@ -43,19 +43,46 @@ function afficher(etat: EtatPartie, joueur: IdJoueur): void {
 }
 // ---------------------------------------------------------------------------------------
 
+const CHOIX_ADVERSAIRE: Record<string, Adversaire> = {
+  "1": "humain",
+  "2": "prudente",
+  "3": "bluffeuse",
+};
+
+async function choisirAdversaire(clavier: Clavier): Promise<Adversaire | undefined> {
+  console.log("Contre qui joues-tu ?");
+  console.log("  1  un autre joueur (même clavier)");
+  console.log("  2  l'ordinateur prudent");
+  console.log("  3  l'ordinateur bluffeur");
+  for (;;) {
+    const reponse = await clavier.lire("Ton choix (1-3) > ");
+    if (reponse === undefined) {
+      return undefined;
+    }
+    const choix = CHOIX_ADVERSAIRE[reponse.trim()];
+    if (choix !== undefined) {
+      return choix;
+    }
+    console.log("Tape 1, 2 ou 3.");
+  }
+}
+
 async function main(): Promise<void> {
-  const partie = demarrerPartie();
-
-  console.log("MIRAGE : traverse le lac de sel avant ton adversaire.");
-  console.log("J1 part du haut et va vers le bas, J2 part du bas et va vers le haut.\n");
-  console.log(AIDE);
-
   const clavier = new Clavier();
   try {
+    console.log("MIRAGE : traverse le lac de sel avant ton adversaire.");
+    console.log("J1 part du haut et va vers le bas, J2 part du bas et va vers le haut.\n");
+    const adversaire = await choisirAdversaire(clavier);
+    if (adversaire === undefined) {
+      return;
+    }
+    const { partie, strategies } = assemblerPartie(adversaire);
+    console.log(`\n${AIDE}`);
     await new BoucleDeJeu(partie, {
       entree: clavier,
       sortie: (texte) => console.log(texte),
       afficher,
+      strategies,
     }).jouer();
   } finally {
     clavier.fermer();

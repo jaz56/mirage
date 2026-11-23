@@ -133,13 +133,15 @@ function appliquer(nouveau) {
   mettreAJourPanneau();
 
   if (etat.terminee) {
+    const gagnant = etat.vainqueur;
+    attenteEcran = true;
     montrerEcran(
-      etat.vainqueur === "Egalite" ? "Égalité" : `Victoire de ${etat.vainqueur} !`,
-      etat.vainqueur === "Egalite"
+      gagnant === "Egalite" ? "Égalité" : `Victoire de ${nomJoueur(gagnant)} !`,
+      gagnant === "Egalite"
         ? "Personne n'a traversé le lac à temps."
-        : `${etat.vainqueur} a traversé le lac de sel. Le mirage n'a pas suffi…`,
-      "Rejouer",
-      nouvellePartie,
+        : `${majuscule(nomJoueur(gagnant))} a traversé le lac de sel. Le mirage n'a pas suffi…`,
+      [{ label: "Rejouer", action: ecranModes }],
+      etat.replay,
     );
     return;
   }
@@ -148,11 +150,15 @@ function appliquer(nouveau) {
     montrerEcran(
       `Au tour de ${etat.joueur}`,
       `Passe l'écran à ${etat.joueur}. Que l'autre joueur ne regarde pas !`,
-      `Je suis ${etat.joueur}`,
-      () => {
-        attenteEcran = false;
-        cacherEcran();
-      },
+      [
+        {
+          label: `Je suis ${etat.joueur}`,
+          action: () => {
+            attenteEcran = false;
+            cacherEcran();
+          },
+        },
+      ],
     );
   }
 }
@@ -163,7 +169,13 @@ function mettreAJourPanneau() {
   const carte = el("carte-joueur");
   carte.dataset.joueur = j;
   el("nom-joueur").textContent = j === "J1" ? "Joueur 1" : "Joueur 2";
-  el("tour").textContent = `Tour ${etat.tour}`;
+  el("tour").textContent =
+    `Tour ${etat.tour}` +
+    (etat.adversaire === "prudente"
+      ? " · vs 🤖 prudent"
+      : etat.adversaire === "bluffeuse"
+        ? " · vs 🎭 bluffeur"
+        : "");
   el("phase-texte").textContent = `${ICONES_PHASE[etat.phase]} ${NOMS_PHASE[etat.phase]}`;
   el("description-phase").textContent = etat.descriptionPhase;
 
@@ -222,13 +234,44 @@ function echapper(texte) {
   );
 }
 
-function montrerEcran(titre, texte, bouton, action) {
+function montrerEcran(titre, texte, boutons, replay) {
   el("ecran-titre").textContent = titre;
   el("ecran-texte").textContent = texte;
-  const b = el("ecran-bouton");
-  b.textContent = bouton;
-  b.onclick = action;
+  const zone = el("ecran-boutons");
+  zone.replaceChildren();
+  boutons.forEach((bouton, i) => {
+    const b = document.createElement("button");
+    b.textContent = bouton.label;
+    b.className = i === 0 ? "grand" : "grand secondaire";
+    b.addEventListener("click", bouton.action);
+    zone.appendChild(b);
+  });
+  const liste = el("ecran-replay");
+  liste.innerHTML = replay && replay.length > 0 ? htmlReplay(replay) : "";
+  liste.classList.toggle("visible", Boolean(replay && replay.length > 0));
   el("ecran").classList.add("visible");
+}
+
+/** Le replay final : toutes les actions de la partie, tour par tour. */
+function htmlReplay(entrees) {
+  let tour = 0;
+  let html = "<h3>Replay de la partie</h3>";
+  for (const e of entrees) {
+    if (e.tour !== tour) {
+      tour = e.tour;
+      html += `<div class="replay-tour">Tour ${e.tour} · ${NOMS_PHASE[e.phase]}</div>`;
+    }
+    html += `<div class="replay-ligne ${e.joueur}">${echapper(e.texte)}</div>`;
+  }
+  return html;
+}
+
+function majuscule(texte) {
+  return texte.charAt(0).toUpperCase() + texte.slice(1);
+}
+
+function nomJoueur(joueur) {
+  return joueur === "J2" && etat && etat.adversaire !== "humain" ? "l'ordinateur" : joueur;
 }
 
 function cacherEcran() {
@@ -244,20 +287,26 @@ function toast(message, type = "") {
   setTimeout(() => t.remove(), type === "info" ? 4500 : 3000);
 }
 
-async function nouvellePartie() {
-  const reponse = await appeler("/api/nouvelle", {});
+async function nouvellePartie(adversaire) {
+  const reponse = await appeler("/api/nouvelle", { adversaire });
   etat = null;
   carteChoisie = null;
-  attenteEcran = true;
+  attenteEcran = false;
   appliquer(reponse.etat);
+  cacherEcran();
+}
+
+/** Écran d'accueil : on choisit contre qui jouer. */
+function ecranModes() {
+  attenteEcran = true;
   montrerEcran(
     "MIRAGE",
-    "Nouvelle partie : un nouveau lac t'attend. Joueur 1 commence.",
-    "Commencer",
-    () => {
-      attenteEcran = false;
-      cacherEcran();
-    },
+    "Traverse le lac de sel avant ton adversaire. Tu pars du haut, il part du bas. Les apparences sont trompeuses…",
+    [
+      { label: "👥 Deux joueurs (même écran)", action: () => nouvellePartie("humain") },
+      { label: "🤖 Contre l'ordinateur prudent", action: () => nouvellePartie("prudente") },
+      { label: "🎭 Contre l'ordinateur bluffeur", action: () => nouvellePartie("bluffeuse") },
+    ],
   );
 }
 
@@ -853,7 +902,7 @@ document.querySelectorAll("[data-carte]").forEach((b) =>
 );
 el("nouvelle").addEventListener("click", () => {
   if (confirm("Abandonner la partie et en recommencer une nouvelle ?")) {
-    nouvellePartie();
+    ecranModes();
   }
 });
 
@@ -879,7 +928,7 @@ document.addEventListener("keydown", (e) => {
     return;
   }
   if (touche === "Enter" && el("ecran").classList.contains("visible")) {
-    el("ecran-bouton").click();
+    el("ecran-boutons").querySelector("button")?.click();
     return;
   }
   if (attenteEcran) return;
@@ -913,14 +962,6 @@ document.addEventListener("keydown", (e) => {
   const reponse = await appeler("/api/etat");
   attenteEcran = true;
   appliquer(reponse.etat);
-  montrerEcran(
-    "MIRAGE",
-    "Traverse le lac de sel avant ton adversaire. J1 part du haut, J2 part du bas. Les apparences sont trompeuses…",
-    "Commencer",
-    () => {
-      attenteEcran = false;
-      cacherEcran();
-    },
-  );
+  ecranModes();
   requestAnimationFrame(animer);
 })();
